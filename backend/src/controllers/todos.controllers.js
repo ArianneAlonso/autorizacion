@@ -31,5 +31,10 @@ export const updTodoCtrl = (req, res)=>{
 };
 
 export const dltTodoCtrl = (req, res)=>{
+  const { id}= req.params;
 
-};
+  const tdIndex = database.todos.findIndex((todo => todo.id === parseInt(id)));
+  if(tdIndex === -1){
+    return res.status(403).json
+  }
+}
