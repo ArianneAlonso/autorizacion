@@ -1,5 +1,4 @@
 import jwt from "jsonwebtoken";
-
 import { SECRET_KEY } from "../config/env.js";
 import { database } from "../db/database.js";
 
