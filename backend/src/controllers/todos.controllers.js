@@ -1,5 +1,6 @@
 import { database } from "../db/database.js";
 
+//muestra las tareas
 export const getAllTodosCtrl = (req, res) => {
   
   console.log(req.user)
@@ -9,6 +10,7 @@ export const getAllTodosCtrl = (req, res) => {
   res.json({ todos });
 };
 
+//crear una tarea
 export const crearTodoCtrl = (req, res) => {
   const {title, completed} = req.body;
 
@@ -26,15 +28,44 @@ database.todos.push(nuevoTodo);
 res.status(201).json({ message: "se ha creado exitosamente", todo: nuevoTodo});
 }; 
 
-export const updTodoCtrl = (req, res)=>{
+// actualizar una tarea
+export const updTodoCtrl = (req, res) => {
+  const { id } = req.params;
+  const { title, completed } = req.body;
 
+  const todo = database.todos.find((todo) => todo.id === parseInt(id));
+
+  if (!todo) {
+    return res.status(404).json({ message: "npo se encontro la tarea" });
+  }
+
+  if (todo.owner !== req.user.id) {
+    return res.status(403).json({ message: "no tienes autorizacion para actualizar esta tarea" });
+  }
+
+  todo.title = title !== undefined ? title : todo.title;
+  todo.completed = completed !== undefined ? completed : todo.completed;
+
+  res.json({ message: "se actualizo la tarae", todo });
 };
 
-export const dltTodoCtrl = (req, res)=>{
-  const { id}= req.params;
+// elimina una tarea
+export const dltTodoCtrl = (req, res) => {
+  const { id } = req.params;
 
-  const tdIndex = database.todos.findIndex((todo => todo.id === parseInt(id)));
-  if(tdIndex === -1){
-    return res.status(403).json
+  const todoIndex = database.todos.findIndex((todo) => todo.id === parseInt(id));
+
+  if (todoIndex === -1) {
+    return res.status(404).json({ message: "no se encontro la tarea" });
   }
-}
+
+  const todo = database.todos[todoIndex];
+
+  if (todo.owner !== req.user.id) {
+    return res.status(403).json({ message: "no tienes autorizacion para eliminar esta tarea" });
+  }
+
+  database.todos.splice(todoIndex, 1);
+
+  res.json({ message: "tarea eliminada" });
+};
